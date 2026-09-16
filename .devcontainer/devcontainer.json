@@ -1,0 +1,10 @@
+{
+  "name": "Astro Development",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "forwardPorts": [4321],
+  "mounts": [
+    "source=${localWorkspaceFolder}/../.pnpm-store,target=/pnpm-store,type=bind"
+  ]
+}
