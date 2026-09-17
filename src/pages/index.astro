@@ -1,10 +1,8 @@
 ---
 import Layout from '@layouts/Layout.astro'
-import { getProjects, stack } from '@utils/data'
+import { projects, stack } from '@utils/data'
 import { render } from 'astro:content'
 import { getSortedBlogPosts } from '@utils/posts-collection'
-
-const projects = await getProjects()
 
 const posts = (await getSortedBlogPosts()).slice(0, 5)
 

@@ -7,15 +7,7 @@ type Project = {
   langColor: string
 }
 
-/* commands worth showing for repos we know; anything else gets gh repo clone */
-const cmdOverrides: Record<string, string> = {
-  clack: 'npm i @clack/prompts',
-  cli: 'npx @e18e/cli analyze',
-  studiocms: 'npm create studiocms@latest',
-}
-
-/* static fallback when the pinned-repos service is down */
-const fallbackProjects: Project[] = [
+const projects: Project[] = [
   {
     name: 'clack',
     description:
@@ -53,64 +45,6 @@ const fallbackProjects: Project[] = [
     langColor: '#fcb32c',
   },
 ]
-
-type PinnedRepo = {
-  owner: string
-  repo: string
-  description: string
-  language: string
-  languageColor: string
-}
-
-async function fetchPinned(): Promise<Project[]> {
-  const res = await fetch(
-    'https://gh-pinned-repos-tsj7ta5xfhep.deno.dev/?username=dreyfus92',
-    { signal: AbortSignal.timeout(3000) },
-  )
-  if (!res.ok) throw new Error(`pinned repos: ${res.status}`)
-  const repos: PinnedRepo[] = await res.json()
-  return repos.map((r) => {
-    const owner = r.owner.replace(/\/+$/, '')
-    return {
-      name: r.repo,
-      description: r.description,
-      link: `https://github.com/${owner}/${r.repo}`,
-      meta: `${r.language} · ${owner}`,
-      cmd: cmdOverrides[r.repo] ?? `gh repo clone ${owner}/${r.repo}`,
-      langColor: r.languageColor,
-    }
-  })
-}
-
-/* module-scope cache: only the first request after a cold start waits on the
-   scraper; after the TTL we serve stale and refresh in the background */
-const TTL_MS = 10 * 60 * 1000
-let cache: { projects: Project[]; at: number } | null = null
-let refreshing: Promise<void> | null = null
-
-export async function getProjects(): Promise<Project[]> {
-  if (cache) {
-    if (Date.now() - cache.at >= TTL_MS) {
-      refreshing ??= fetchPinned()
-        .then((projects) => {
-          cache = { projects, at: Date.now() }
-        })
-        .catch(() => {}) // keep serving stale if the scraper is down
-        .finally(() => {
-          refreshing = null
-        })
-    }
-    return cache.projects
-  }
-
-  try {
-    const projects = await fetchPinned()
-    cache = { projects, at: Date.now() }
-    return projects
-  } catch {
-    return fallbackProjects
-  }
-}
 
 const stack = [
   { name: 'typescript', color: '#3178c6' },
@@ -153,5 +87,4 @@ const socials = [
   },
 ]
 
-export { socials, stack }
-export type { Project }
+export { projects, socials, stack }
