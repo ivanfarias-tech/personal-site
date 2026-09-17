@@ -1,6 +1,5 @@
 {
-  "name": "paulvall.dev",
-  "author": "Paul Valladares <paulvi92@gmail.com>",
+  "name": "personal-site",
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",

@@ -59,32 +59,4 @@ const stack = [
   { name: 'docker', color: '#2496ed' },
 ]
 
-const socials = [
-  {
-    name: 'GitHub',
-    url: 'https://github.com/dreyfus92',
-    ariaLabel: 'Paul Valladares GitHub Profile',
-  },
-  {
-    name: 'Bluesky',
-    url: 'https://bsky.app/profile/paulvall.dev',
-    ariaLabel: 'Paul Valladares Bluesky Profile',
-  },
-  {
-    name: 'X / Twitter',
-    url: 'https://twitter.com/soysarcasme',
-    ariaLabel: 'Paul Valladares Twitter Profile',
-  },
-  {
-    name: 'LinkedIn',
-    url: 'https://www.linkedin.com/in/paul-valladares',
-    ariaLabel: 'Paul Valladares LinkedIn Profile',
-  },
-  {
-    name: 'Discord',
-    url: 'https://discord.com/users/603517171175391242',
-    ariaLabel: 'Paul Valladares Discord Profile',
-  },
-]
-
-export { projects, socials, stack }
+export { projects, stack }

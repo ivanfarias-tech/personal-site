@@ -25,7 +25,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10)
     const el = document.getElementById('myself')
     if (el && !el.dataset.scrambled) {
       el.dataset.scrambled = 'true'
-      scrambleText(el, 'Paul Valladares')
+      scrambleText(el, 'Ivan Farias')
     }
   }
   run()
@@ -33,7 +33,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10)
 </script>
 
 <Layout
-  title='Paul Valladares | Home'
+  title='Ivan Farias | Home'
   image={new URL('/og/default.png', Astro.site)}
 >
   <main class='mx-auto w-full max-w-[880px] px-8'>
@@ -42,7 +42,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10)
       <h1
         class='text-ink mt-3 text-4xl font-bold tracking-tight md:text-6xl'
       >
-        <span id='myself'>Paul Valladares</span><span
+        <span id='myself'>Ivan Farias</span><span
           aria-hidden='true'
           class='bg-accent ml-1.5 inline-block h-[0.9em] w-[0.55em] animate-[blink_1.1s_steps(1)_infinite] align-baseline'
         ></span>
