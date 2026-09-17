@@ -8,7 +8,7 @@ export const GET: APIRoute = async () => {
             .map(
                 (post) =>
                     `# ${post.data.title}\n\n
-                https://www.paulvall.dev/posts/${post.id}.mdx \n
+                https://www.ivanfarias.tech/posts/${post.id}.mdx \n
                 ${post.data.description} \n
                   ${post.body}
                 }`

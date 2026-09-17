@@ -122,7 +122,7 @@ export function buildOgTemplate({
           color: colors.faint,
         },
         [
-          el('span', {}, 'paulvall.dev'),
+          el('span', {}, 'ivanfarias.tech'),
           date ? el('span', { color: colors.dim }, date) : '',
         ].filter(Boolean) as OgNode[],
       ),

@@ -12,7 +12,7 @@ export default defineConfig({
     processor: unified({ remarkPlugins: [remarkReadingTime] }),
   },
   integrations: [sitemap(), expressiveCode(), mdx()],
-  site: 'https://www.paulvall.dev',
+  site: 'https://www.ivanfarias.tech',
   prefetch: { prefetchAll: true },
   image: {
     remotePatterns: [{ protocol: 'https' }],
