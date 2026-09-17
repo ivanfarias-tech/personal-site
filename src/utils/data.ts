@@ -9,40 +9,40 @@ type Project = {
 
 const projects: Project[] = [
   {
-    name: 'clack',
+    name: 'azure hybrid lab',
     description:
-      'Effortlessly build beautiful command-line apps. Prompts people actually enjoy.',
-    link: 'https://github.com/bombshell-dev/clack',
-    meta: 'TypeScript · bombshell-dev',
-    cmd: 'npm i @clack/prompts',
-    langColor: '#3178c6',
+      'Hybrid infrastructure experiments connecting on-premises services with Microsoft Azure.',
+    link: 'https://github.com/ibmfarias',
+    meta: 'Azure · Hybrid Cloud · Terraform',
+    cmd: 'terraform plan',
+    langColor: '#0078d4',
   },
   {
-    name: 'e18e/cli',
+    name: 'homelab infrastructure',
     description:
-      'A powerful CLI for analyzing and optimizing your JS/TS projects.',
-    link: 'https://github.com/e18e/cli',
-    meta: 'TypeScript · e18e',
-    cmd: 'npx @e18e/cli analyze',
-    langColor: '#3178c6',
+      'Private cloud infrastructure built with Proxmox, TrueNAS, OPNsense and MikroTik.',
+    link: 'https://github.com/ibmfarias',
+    meta: 'Proxmox · TrueNAS · OPNsense',
+    cmd: 'pvesh get /nodes',
+    langColor: '#e57000',
   },
   {
-    name: 'studiocms',
+    name: 'network segmentation',
     description:
-      'Astro-native headless CMS, built from the ground up by and for the Astro community.',
-    link: 'https://github.com/withstudiocms/studiocms',
-    meta: 'TypeScript · withstudiocms',
-    cmd: 'npm create studiocms@latest',
-    langColor: '#3178c6',
+      'VLAN-based network architecture exploring firewalling, routing and controlled inter-network access.',
+    link: 'https://github.com/ibmfarias',
+    meta: 'OPNsense · MikroTik · VLAN',
+    cmd: '/firewall/configure-vlan',
+    langColor: '#e2442f',
   },
   {
-    name: 'docs maintainership',
+    name: 'infrastructure automation',
     description:
-      'Astro Docs, Starlight and Tauri Docs. The unglamorous work that decides whether anyone can use the glamorous work.',
-    link: 'https://github.com/withastro/docs',
-    meta: 'MDX · withastro · tauri-apps',
-    cmd: 'gh repo clone withastro/docs',
-    langColor: '#fcb32c',
+      'Infrastructure-as-code experiments for repeatable cloud and homelab environments.',
+    link: 'https://github.com/ibmfarias',
+    meta: 'Terraform · GitHub Actions · Cloud',
+    cmd: 'terraform apply',
+    langColor: '#844fba',
   },
 ]
 
