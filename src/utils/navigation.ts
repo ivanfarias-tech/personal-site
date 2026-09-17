@@ -8,10 +8,6 @@ export const navItems = [
     text: 'Posts',
   },
   {
-    route: '/socials',
-    text: 'Socials',
-  },
-  {
     route: '/contact',
     text: 'Contact',
   },
