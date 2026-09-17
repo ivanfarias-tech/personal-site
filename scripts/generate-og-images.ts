@@ -76,7 +76,7 @@ async function main() {
     join(ogDir, 'default.png'),
     await generateOgImage({
       command: 'whoami',
-      title: 'Paul Valladares',
+      title: 'Ivan Farias',
       description:
         'Fullstack dev and open source maintainer. TypeScript, Node.js, and CLI tools.',
     }),

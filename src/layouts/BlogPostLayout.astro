@@ -14,8 +14,8 @@ interface Props {
     title: string
     description: string
     pubDate: Date
-    cover: ImageMetadata
-    coverAlt: string
+    cover?: ImageMetadata
+    coverAlt?: string
   }
   minutes: string
 }
@@ -54,11 +54,15 @@ const prevPost = posts[index - 1]
         <span>{minutes}</span>
       </div>
       <hr class='border-border mt-5 mb-10' />
-      <Image
-        src={frontmatter.cover}
-        alt={frontmatter.coverAlt}
-        class='border-border border'
-      />
+      {
+        frontmatter.cover && (
+          <Image
+            src={frontmatter.cover}
+            alt={frontmatter.coverAlt ?? ''}
+            class='border-border border'
+          />
+        )
+      }
       <article class='mt-8'>
         <slot />
       </article>

@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async () => {
     const posts = await getCollection("posts");
-    const content = `# Paul Valladares' Blog\n
+    const content = `# Ivan Farias' Blog\n
     ${posts
             .map(
                 (post) =>

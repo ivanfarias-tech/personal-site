@@ -7,7 +7,7 @@ export const prerender = true
 export const GET: APIRoute = async (context) => {
   const posts = await getSortedBlogPosts()
   return rss({
-    title: "Paul Valladares' Blog",
+    title: "Ivan Farias' Blog",
     description:
       'Coding quirks, tech discoveries, historical mysteries and occasional life musings.',
     site: context.site!,
