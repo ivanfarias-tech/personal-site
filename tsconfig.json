@@ -9,20 +9,19 @@
   ],
   "compilerOptions": {
     "strictNullChecks": true,
-    "baseUrl": ".",
     "paths": {
       "@components/*": [
-        "src/components/*"
+        "./src/components/*"
       ],
       "@layouts/*": [
-        "src/layouts/*"
+        "./src/layouts/*"
       ],
       "@utils/*": [
-        "src/utils/*"
+        "./src/utils/*"
       ],
       // "@styles/*": ["src/styles/*"],
       "@assets/*": [
-        "src/assets/*"
+        "./src/assets/*"
       ]
     }
   }
