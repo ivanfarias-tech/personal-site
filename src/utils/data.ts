@@ -49,12 +49,12 @@ const projects: Project[] = [
 const stack = [
   { name: 'azure', color: '#0078D4' },
   { name: 'aws', color: '#FF9900' },
-  { name: 'terraform', color: '#7B42BC' },
+  { name: 'terraform', color: '#844FBA' },
   { name: 'proxmox', color: '#E57000' },
   { name: 'linux', color: '#FCC624' },
   { name: 'windows server', color: '#0078D4' },
   { name: 'docker', color: '#2496ED' },
-  { name: 'mikrotik', color: '#293239' },
+  { name: 'mikrotik', color: '#39434a' },
   { name: 'truenas', color: '#0095D5' },
   { name: 'git/github', color: '#F05032' },
 ]

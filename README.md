@@ -1,99 +1,230 @@
-# 🧑🏻‍💻 My personal website
+# Ivan Farias --- Personal Site
 
-A minimal-JS personal site and blog built with [Astro](https://astro.build/).
+Personal website and technical blog built with
+[Astro](https://astro.build/).
 
-## Stack
+The site focuses on infrastructure, cloud, automation, networking,
+homelab experiments, technical notes, and practical guides.
 
-- **Framework:** [Astro 7](https://astro.build/) (MDX, `output: 'server'`)
-- **Deployment:** [Cloudflare Workers](https://workers.cloudflare.com/) via [`@astrojs/cloudflare`](https://docs.astro.build/en/guides/integrations-guide/cloudflare/) and [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) via [`@tailwindcss/vite`](https://tailwindcss.com/docs/installation/framework-guides/astro)
-- **Content:** Astro Content Collections (`glob` loader + Zod schema)
-- **Code blocks:** [expressive-code](https://expressive-code.com/)
-- **Package manager:** [pnpm](https://pnpm.io/)
+## Technology
+
+-   **Framework:** [Astro 7](https://astro.build/) with static output
+-   **Content:** MDX + Astro Content Collections
+-   **Styling:** [Tailwind CSS v4](https://tailwindcss.com/) with
+    CSS-first configuration
+-   **Code blocks:** [Expressive Code](https://expressive-code.com/)
+-   **Package manager:** [pnpm](https://pnpm.io/)
+-   **Deployment:** Static hosting; portable across static hosting
+    platforms, object-storage based hosting, and self-hosted
+    environments
+-   **Development environment:** Node.js + VS Code Dev Container
 
 ## Project structure
 
-```text
-├── public/                 # Static assets (favicon, robots.txt)
+``` text
+├── public/                  # Static assets, favicon, robots.txt
 ├── src/
-│   ├── assets/             # Images processed by Astro (post covers, etc.)
-│   ├── components/
+│   ├── assets/              # Images processed by Astro
+│   ├── components/          # Reusable UI components
 │   ├── data/
-│   │   └── blog/           # MDX posts (Content Collection: `posts`)
-│   ├── layouts/
-│   ├── pages/              # Routes (.astro, .ts endpoints)
-│   ├── styles/             # Global + post typography (Tailwind @theme)
-│   ├── utils/
-│   ├── content.config.ts   # Collection schema + glob loader
+│   │   └── blog/            # MDX posts
+│   ├── layouts/             # Page and post layouts
+│   ├── pages/               # Site routes and endpoints
+│   ├── styles/              # Global and post typography
+│   ├── utils/               # Site data and utilities
+│   ├── content.config.ts    # Content collection schema
 │   └── env.d.ts
 ├── astro.config.ts
-├── wrangler.jsonc          # Cloudflare Workers config
 ├── package.json
 ├── pnpm-lock.yaml
 ├── tsconfig.json
 └── LICENSE
 ```
 
-### Routes
+## Routes
 
-| Path | File | Notes |
-| --- | --- | --- |
-| `/` | `pages/index.astro` | Home |
-| `/posts` | `pages/posts/index.astro` | Blog index, grouped by year |
-| `/posts/[id]` | `pages/posts/[id].astro` | Individual posts (prerendered) |
-| `/socials` | `pages/socials.astro` | Social links |
-| `/contact` | `pages/contact.astro` | Contact form |
-| `/llms.txt` | `pages/llms.txt.ts` | Plain-text blog export for LLMs |
+  ---------------------------------------------------------------------------
+  Path                    File                        Description
+  ----------------------- --------------------------- -----------------------
+  `/`                     `pages/index.astro`         Home
 
-Blog URLs use each post's collection **id** (the MDX filename stem), e.g. `/posts/wirths-law`.
+  `/posts`                `pages/posts/index.astro`   Blog index, grouped by
+                                                      year
 
-### Content
+  `/posts/[id]`           `pages/posts/[id].astro`    Individual posts
 
-MDX lives in `src/data/blog/` and is registered in `src/content.config.ts`. Each post requires this frontmatter:
+  `/contact`              `pages/contact.astro`       Contact information
 
-```yaml
-title: 'Post title'
-description: 'Short summary'
-pubDate: 2024-01-14
-draft: false
-cover: '@assets/posts/cover.png'
-coverAlt: 'Cover description'
+  `/llms.txt`             `pages/llms.txt.ts`         Plain-text export of
+                                                      blog content
+  ---------------------------------------------------------------------------
+
+Blog URLs use each post's collection **id**, based on the MDX filename
+stem.
+
+## Content
+
+Posts are written in MDX and stored in:
+
+``` text
+src/data/blog/
 ```
 
-Set `draft: true` to hide a post in production. Covers under `src/assets/` go through Astro's image pipeline at build time.
+The current post frontmatter supports:
 
-### Tailwind
+``` yaml
+title: ""
+description: ""
+pubDate: ""
+draft: false
+cover:
+coverAlt: ""
+```
 
-There is no `tailwind.config.js`. Theme tokens live in CSS (`src/styles/index.css`, `src/styles/posts.css`) using Tailwind v4's CSS-first setup, wired through `astro.config.ts` → `vite.plugins: [tailwindcss()]`.
+`cover` and `coverAlt` are optional.
 
-## Scripts
+Set `draft: true` to exclude a post from the production build.
 
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Start the dev server |
-| `pnpm start` | Type-check in watch mode + dev server |
-| `pnpm build` | Production build |
-| `pnpm preview` | Preview the production build locally |
-| `pnpm format` | Format with Prettier |
+MDX supports regular Markdown syntax, fenced code blocks, and Astro/MDX
+components when a post requires them.
 
-## Running locally
+## Styling
 
-Requires **Node.js 18.20.8+**, **20.3.0+**, or **22+**.
+The project uses Tailwind CSS v4 with CSS-first configuration.
 
-```bash
-git clone git@github.com:dreyfus92/astro-portfolio.git
-cd astro-portfolio
+Theme tokens are defined in:
+
+``` text
+src/styles/index.css
+```
+
+The site uses semantic color tokens such as:
+
+-   `bg-bg`
+-   `bg-panel`
+-   `text-ink`
+-   `text-dim`
+-   `text-accent`
+
+The visual theme follows the user's operating-system light/dark
+preference.
+
+## Development
+
+The recommended development environment uses the included VS Code Dev
+Container.
+
+The container is based on Node.js 22 and installs the project's pnpm
+version.
+
+### Local setup
+
+Clone the repository:
+
+``` bash
+git clone https://github.com/ivanfarias-tech/personal-site.git
+cd personal-site
+```
+
+Install dependencies:
+
+``` bash
 pnpm install
+```
+
+Start the development server:
+
+``` bash
 pnpm dev
 ```
 
-To preview the Cloudflare build locally:
+The development server listens on port `4321`.
 
-```bash
-pnpm build
-pnpm preview
+### VS Code Dev Container
+
+The repository includes:
+
+``` text
+.devcontainer/
+├── Dockerfile
+└── devcontainer.json
 ```
+
+Opening the project in a compatible VS Code environment allows the
+project to run inside the development container without requiring the
+project's Node.js/pnpm environment to be installed directly on the host.
+
+## Scripts
+
+Available package scripts include:
+
+``` bash
+pnpm dev       # Start the development server
+pnpm start     # Start the production server/preview command
+pnpm build     # Build the static site
+pnpm preview   # Preview the generated site
+pnpm format    # Format project files
+```
+
+The production build is generated in:
+
+``` text
+dist/
+```
+
+## Deployment
+
+The site is configured for **static output**.
+
+Running:
+
+``` bash
+pnpm build
+```
+
+generates the complete website under `dist/`.
+
+Because the generated site is static, deployment is not tied to a
+specific application runtime or cloud provider. The resulting files can
+be served by static hosting platforms, object storage with static-site
+delivery, or a self-hosted web server.
+
+The production site is:
+
+**https://www.ivanfarias.tech**
+
+## Projects
+
+Project information displayed on the home page is maintained locally in:
+
+``` text
+src/utils/data.ts
+```
+
+The project listing does not depend on an external pinned-repository
+service. This keeps the site's project presentation under direct
+repository control.
+
+## Credits
+
+This project started from [Astro
+Portfolio](https://github.com/dreyfus92/astro-portfolio) by **Paul
+Valladares** (`dreyfus92`).
+
+The original project provided the initial Astro structure and visual
+foundation. It is licensed under the MIT License.
+
+This repository has been substantially adapted for a personal
+infrastructure and cloud portfolio, including its content, project
+model, visual identity, navigation, metadata, static architecture, and
+deployment approach.
+
+The original Git history has been preserved as part of the project's
+development history and to maintain transparency regarding its origin.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT License.
+
+The original MIT license and copyright notice are retained in `LICENSE`,
+including the copyright notice for Paul Valladares.
