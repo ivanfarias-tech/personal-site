@@ -191,7 +191,7 @@ delivery, or a self-hosted web server.
 
 The production site is:
 
-**https://www.ivanfarias.tech**
+**https://ivanfarias.tech**
 
 ## Projects
 
