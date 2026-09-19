@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* TTY design system — bomb.sh purple (#871aff). Dark is the default,
+/* TTY design system — Dark is the default,
    light follows the OS preference. */
 :root {
   --bg: #18191b;
@@ -19,15 +19,15 @@
 @media (prefers-color-scheme: light) {
   :root {
     --bg: #fbfafd;
-    --panel: #f4f1fa;
-    --border: #e5def2;
-    --ink: #241b38;
-    --dim: #6f6488;
-    --faint: #a89bc4;
-    --accent: ##7a14e6;
-    --accent-dim: #b28ae0;
-    --glow: rgba(135, 26, 255, 0.045);
-    --tint: rgba(135, 26, 255, 0.05);
+    --panel: #f8fafc;
+    --border: #e7f7f0;
+    --ink: #020617;
+    --dim: #1f2937;
+    --faint: #059669;
+    --accent: #10b981;
+    --accent-dim: #10b981;
+    --glow: rgba(255, 255, 255, 0.05);
+    --tint: rgba(255, 255, 255, 0.05);
     color-scheme: light;
   }
 }
@@ -96,8 +96,7 @@
   }
 }
 
-/* brand-colored stack tags; light theme darkens the color for contrast
-   (javascript yellow et al. are illegible on near-white) */
+/* stack tags; light theme darkens the color for contrast */
 .tag {
   color: var(--tag, var(--dim));
 }

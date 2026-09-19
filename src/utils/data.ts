@@ -50,13 +50,13 @@ const stack = [
   { name: 'azure', color: '#bbf7d0' },
   { name: 'aws', color: '#bbf7d0' },
   { name: 'terraform', color: '#bbf7d0' },
-  { name: 'proxmox', color: '#bbf7d0' },
   { name: 'linux', color: '#bbf7d0' },
   { name: 'windows server', color: '#bbf7d0' },
   { name: 'docker', color: '#bbf7d0' },
+  { name: 'git/github', color: '#bbf7d0' },
+  { name: 'proxmox', color: '#bbf7d0' },
   { name: 'opnsense', color: '#bbf7d0' },
   { name: 'truenas', color: '#bbf7d0' },
-  { name: 'git/github', color: '#bbf7d0' },
 ]
 
 export { projects, stack }
