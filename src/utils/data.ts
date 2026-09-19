@@ -47,16 +47,16 @@ const projects: Project[] = [
 ]
 
 const stack = [
-  { name: 'azure', color: '#0078D4' },
-  { name: 'aws', color: '#FF9900' },
-  { name: 'terraform', color: '#844FBA' },
-  { name: 'proxmox', color: '#E57000' },
-  { name: 'linux', color: '#FCC624' },
-  { name: 'windows server', color: '#0078D4' },
-  { name: 'docker', color: '#2496ED' },
-  { name: 'opnsense', color: '#e2442f' },
-  { name: 'truenas', color: '#0095D5' },
-  { name: 'git/github', color: '#F05032' },
+  { name: 'azure', color: '#bbf7d0' },
+  { name: 'aws', color: '#bbf7d0' },
+  { name: 'terraform', color: '#bbf7d0' },
+  { name: 'proxmox', color: '#bbf7d0' },
+  { name: 'linux', color: '#bbf7d0' },
+  { name: 'windows server', color: '#bbf7d0' },
+  { name: 'docker', color: '#bbf7d0' },
+  { name: 'opnsense', color: '#bbf7d0' },
+  { name: 'truenas', color: '#bbf7d0' },
+  { name: 'git/github', color: '#bbf7d0' },
 ]
 
 export { projects, stack }

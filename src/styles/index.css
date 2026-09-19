@@ -3,16 +3,16 @@
 /* TTY design system — bomb.sh purple (#871aff). Dark is the default,
    light follows the OS preference. */
 :root {
-  --bg: #05091A;
-  --panel: #131020;
-  --border: #261e3c;
+  --bg: #18191b;
+  --panel: #18191b;
+  --border: #232427;
   --ink: #EEF2FF;
-  --dim: #bdbbea;
-  --faint: #7B9CC8;
-  --accent: #2196F3;
-  --accent-dim: #2196F3;
-  --glow: rgba(135, 26, 255, 0.07);
-  --tint: rgba(135, 26, 255, 0.08);
+  --dim: #e2e8f0;
+  --faint: #bbf7d0;
+  --accent: #10b981;
+  --accent-dim: #10b981;
+  --glow: rgba(255, 255, 255, 0.01);
+  --tint: rgba(255, 255, 255, 0.02);
   color-scheme: dark;
 }
 
