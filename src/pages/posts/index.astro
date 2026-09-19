@@ -19,7 +19,8 @@ for (const entry of withMinutes) {
 }
 const years = [...byYear.keys()].sort((a, b) => b - a)
 
-const formatDate = (date: Date) => date.toISOString().slice(0, 10)
+const formatDate = (date: Date) =>
+  date.toLocaleDateString('pt-BR')
 ---
 
 <Layout

@@ -13,7 +13,8 @@ const latest = await Promise.all(
   }),
 )
 
-const formatDate = (date: Date) => date.toISOString().slice(0, 10)
+const formatDate = (date: Date) =>
+  date.toLocaleDateString('pt-BR')
 ---
 
 <script>
@@ -209,7 +210,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10)
           latest.map(({ post, minutes }) => (
             <a
               href={`/posts/${post.id}`}
-              class='border-border hover:bg-tint group grid grid-cols-[110px_1fr_auto] items-baseline gap-5 border-b px-5 py-3.5 text-sm last:border-b-0'
+              class='border-border hover:bg-tint group grid grid-cols-[85px_1fr] items-baseline gap-3 border-b px-4 py-3.5 text-sm last:border-b-0 md:grid-cols-[110px_1fr_auto] md:gap-5 md:px-5'
             >
               <span class='text-faint text-[12.5px]'>
                 {formatDate(post.data.pubDate)}
@@ -217,7 +218,7 @@ const formatDate = (date: Date) => date.toISOString().slice(0, 10)
               <span class='text-ink group-hover:text-accent'>
                 {post.data.title}
               </span>
-              <span class='text-faint text-[12.5px]'>{minutes}</span>
+              <span class='text-faint hidden text-[12.5px] md:block'>{minutes}</span>
             </a>
           ))
         }
