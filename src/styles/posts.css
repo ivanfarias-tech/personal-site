@@ -37,4 +37,9 @@
   .post blockquote {
     @apply border-accent-dim text-dim my-4 border-l-2 ps-4 italic;
   }
+
+  .post th,
+  .post td {
+    @apply px-3 py-2;
+  }
 }
