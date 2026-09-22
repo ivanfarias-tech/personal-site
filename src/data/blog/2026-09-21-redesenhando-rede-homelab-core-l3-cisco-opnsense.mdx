@@ -1,0 +1,808 @@
+---
+title: "Redesenhando a rede do Homelab: introduzindo Core L3 Cisco e OPNsense"
+description: "Uma jornada em quatro fases para redesenhar a arquitetura do Homelab, introduzindo Core L3 Cisco, segmentação de rede, novos papéis de infraestrutura e práticas de redes corporativas."
+pubDate: 2026-09-21
+draft: false
+---
+
+Um dos maiores desafios em um homelab é a arquitetura de rede. Inicialmente, a estrutura era totalmente plana (todos os hosts na mesma VLAN), o que atendeu aos testes iniciais, mas logo virou um gargalo com a expansão dos serviços.
+
+A adoção de um switch MikroTik CRS226-24G-2S+RM resolveu o problema imediato ao permitir a criação de VLANs e a segmentação do tráfego. Ainda assim, a arquitetura continuava engessada, limitando a execução de novos projetos.
+
+Essa limitação, aliada à chegada de novas tecnologias e à necessidade de explorar outras soluções, motivou o redesenho completo da rede — e a escrita deste artigo.
+
+O texto está estruturado em fases que registram a evolução da topologia. Cada etapa detalha objetivos, endereçamento, configurações e validações.
+
+  > **IMPORTANTE:** Este artigo é um registro de aprendizado, não um guia de implementação. Ele documenta as decisões e testes realizados em ambiente próprio e controlado. Como cada infraestrutura possui particularidades, adapte os conceitos à sua realidade antes de reproduzi-los.
+
+<br></br>
+## Fase 0 — Arquitetura & Objetivos
+
+### 1. Estado Original
+
+- **<u>Cenário inicial:</u>** O homelab foi originalmente construído em torno de uma arquitetura simples, centralizada no OPNsense como gateway, firewall e elemento de roteamento entre as VLANs. A conectividade interna era concentrada em um único switch, atendendo simultaneamente às funções de switching, transporte de VLANs e conexão dos principais serviços do ambiente.
+<br></br> 
+- **<u>Topologia / Setup:</u>** OPNsense -> Trunk 802.1Q -> MikroTik CRS226-24G-2S+RM
+<br></br>
+- **<u>Equipamentos e tecnologias em uso:</u>** O ambiente utilizava OPNsense como firewall/gateway, MikroTik CRS226 como switch principal, VLANs 802.1Q para segmentação lógica e TrueNAS/Proxmox como plataformas para armazenamento e virtualização. A arquitetura era funcional e adequada ao estágio inicial do homelab, mas concentrava responsabilidades importantes em poucos elementos da infraestrutura.
+<br></br>
+
+### 2. Limitações Identificadas
+
+- **<u>Gargalo 1</u>** — Concentração de funções:
+O desenho concentrava switching, transporte de VLANs e interconexão dos principais componentes em um único equipamento, limitando a evolução da arquitetura e aumentando a dependência do switch central.
+- **<u>Gargalo 2</u>** — Separação limitada entre funções de rede:
+A arquitetura não representava claramente uma divisão entre routing, security e switching, dificultando a exploração prática de uma arquitetura hierárquica e de responsabilidades mais próximas das encontradas em ambientes corporativos.
+- **<u>Gargalo 3</u>** — Baixa capacidade de experimentação:
+A infraestrutura anterior atendia bem às necessidades operacionais do homelab, porém oferecia poucas oportunidades para estudar, de forma prática, conceitos como inter-VLAN routing, políticas de acesso, redundância de funções, arquitetura de campus e operação de equipamentos de rede enterprise.
+<br></br>
+
+### 3. Objetivos
+
+*   **<u>Objetivo Principal:</u>** Reestruturar a arquitetura de rede do homelab, introduzindo uma separação mais clara entre firewall/security, routing e switching, utilizando o Cisco C1111-4P e o Catalyst 3560CX como elementos dedicados da nova arquitetura.
+*   **<u>Objetivos Secundários:</u>**
+    1. Transformar o homelab em uma plataforma prática para estudo e experimentação de Cisco IOS, switching, routing e segurança de rede.
+    2. Evoluir a segmentação existente, preservando as VLANs e políticas já estabelecidas onde fizer sentido.
+    3. Reduzir a concentração de responsabilidades em um único equipamento.
+    4. Criar uma arquitetura que permita testar diferentes cenários sem comprometer desnecessariamente os serviços existentes.
+    5. Documentar o processo de migração, incluindo decisões, trade-offs, problemas encontrados e validações realizadas.
+    6. Aproximar o desenho do homelab de princípios utilizados em arquiteturas de infraestrutura de ambientes corporativos, mantendo a escala compatível com um laboratório doméstico.
+
+<br></br>
+---
+<br></br>
+
+
+## Fase 1 — Estabelecendo o núcleo L3
+
+<div className="text-xl font-bold text-accent mt-4 mb-2">Domínio de Roteamento: Cisco C1111-4P + Catalyst 3560CX</div>
+
+### 1. Objetivo
+
+Estabelecer o primeiro domínio de roteamento do homelab utilizando:
+
+* **Cisco Catalyst 3560CX** como switch Layer 3 / core;
+* **Cisco C1111-4P** como roteador upstream;
+* um enlace **Layer 3 ponto a ponto** entre os equipamentos;
+* roteamento inter-VLAN realizado pelo 3560CX;
+* rotas estáticas entre os dois equipamentos.
+
+Nesta etapa ainda não existe OSPF, BGP, NAT, Internet ou OPNsense conectado.
+
+O objetivo é construir e validar uma base funcional de roteamento antes de introduzir protocolos de roteamento dinâmico.
+<br></br>
+---
+
+### 2. Topologia
+
+
+<br></br>
+---
+
+### 3. Endereçamento
+
+| Função          | Equipamento     | Interface | Endereço          |
+| --------------  | -------------   | -------   | ----------------  |
+| P2P             | Cisco C1111-4P  | Gi0/0/0   | `10.255.255.1/30` |
+| P2P             | Catalyst 3560CX | Gi0/12    | `10.255.255.2/30` |
+| Gateway VLAN 10 | Catalyst 3560CX | Vlan10    | `10.10.10.1/24`   |
+| Gateway VLAN 20 | Catalyst 3560CX | Vlan20    | `10.10.20.1/24`   |
+| Host de teste   | NixOS           | Gi0/1     | `10.10.10.10/24`  |
+| Host de teste   | Windows 11      | Gi0/2     | `10.10.20.10/24`  |
+
+Gateways dos hosts:
+
+```text
+VLAN 10 → 10.10.10.1
+VLAN 20 → 10.10.20.1
+```
+<br></br>
+---
+
+### 4. Papel de cada equipamento
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Catalyst 3560CX</div>
+
+O 3560CX atua como **Layer 3 Core**.
+
+Responsabilidades nesta etapa:
+
+* criar as VLANs;
+* fornecer os gateways das VLANs através de SVIs;
+* realizar o roteamento inter-VLAN;
+* manter as redes diretamente conectadas;
+* encaminhar tráfego externo para o C1111;
+* utilizar o C1111 como default next-hop.
+
+O roteamento é habilitado através de:
+
+```text
+ip routing
+```
+<br></br>
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Cisco C1111-4P</div>
+
+O C1111 atua como **roteador upstream** do domínio.
+
+Responsabilidades nesta etapa:
+
+* fornecer o próximo salto para fora das redes diretamente conectadas ao 3560CX;
+* manter rotas de retorno para as VLANs internas;
+* participar do enlace Layer 3 ponto a ponto com o 3560CX.
+
+Nesta etapa ele ainda não possui uma conexão WAN/Internet funcional.
+<br></br>
+---
+
+### 5. Enlace Layer 3 entre os equipamentos
+
+O enlace entre os equipamentos utiliza:
+
+```text
+C1111 Gi0/0/0
+        │
+        │ 10.255.255.0/30
+        │
+3560CX Gi0/12
+```
+
+Endereçamento:
+
+```text
+C1111  → 10.255.255.1/30
+3560CX → 10.255.255.2/30
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Catalyst 3560CX</div>
+
+
+A interface foi convertida de Layer 2 para Layer 3:
+
+```text
+interface GigabitEthernet0/12
+ description P2P-to-C1111
+ no switchport
+ ip address 10.255.255.2 255.255.255.252
+ no shutdown
+```
+
+O comando:
+
+```text
+no switchport
+```
+
+faz com que a interface deixe de ser uma porta de switch Layer 2 e passe a funcionar como uma **interface roteada Layer 3**.
+
+O roteamento Layer 3 do Catalyst é habilitado através de:
+
+```text
+ip routing
+```
+<br></br>
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Cisco C1111-4P</div>
+
+```text
+interface GigabitEthernet0/0/0
+ description P2P-to-3560CX
+ ip address 10.255.255.1 255.255.255.252
+ no shutdown
+```
+<br></br>
+---
+
+### 6. VLANs
+
+Foram criadas duas VLANs iniciais.
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">VLAN 10 — Management</div>
+
+```text
+vlan 10
+ name MANAGEMENT
+```
+
+Rede:
+
+```text
+10.10.10.0/24
+```
+
+Gateway:
+
+```text
+10.10.10.1
+```
+<br></br>
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">VLAN 20 — Servers</div>
+
+```text
+vlan 20
+ name SERVERS
+```
+
+Rede:
+
+```text
+10.10.20.0/24
+```
+
+Gateway:
+
+```text
+10.10.20.1
+```
+<br></br>
+---
+
+### 7. SVIs
+
+O gateway de cada VLAN é uma **Switched Virtual Interface (SVI)** no 3560CX.
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">VLAN 10</div>
+
+```text
+interface Vlan10
+ description Management-SVI
+ ip address 10.10.10.1 255.255.255.0
+ no shutdown
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">VLAN 20</div>
+
+```text
+interface Vlan20
+ description Servers-SVI
+ ip address 10.10.20.1 255.255.255.0
+ no shutdown
+```
+
+Essas interfaces representam os gateways Layer 3 das respectivas VLANs.
+<br></br>
+---
+
+### 8. Portas de teste
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Gi0/1 — VLAN 10</div>
+
+```text
+interface GigabitEthernet0/1
+ description TEST-MGMT
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+```
+
+Host conectado:
+
+```text
+10.10.10.10/24
+Gateway: 10.10.10.1
+```
+<br></br>
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Gi0/2 — VLAN 20</div>
+
+```text
+interface GigabitEthernet0/2
+ description TEST-SERVER
+ switchport mode access
+ switchport access vlan 20
+ no shutdown
+```
+
+Host conectado:
+
+```text
+10.10.20.10/24
+Gateway: 10.10.20.1
+```
+<br></br>
+---
+
+### 9. Tabela de roteamento — 3560CX
+
+Após habilitar `ip routing`, o Catalyst passou a conhecer as redes diretamente conectadas:
+
+```text
+C 10.10.10.0/24 → Vlan10
+L 10.10.10.1/32 → Vlan10
+
+C 10.10.20.0/24 → Vlan20
+L 10.10.20.1/32 → Vlan20
+
+C 10.255.255.0/30 → GigabitEthernet0/12
+L 10.255.255.2/32 → GigabitEthernet0/12
+```
+
+Onde:
+
+* `C` = Connected
+* `L` = Local
+
+<br></br>
+---
+
+### 10. Roteamento inter-VLAN
+
+O 3560CX possui:
+
+```text
+VLAN 10
+10.10.10.0/24
+Gateway 10.10.10.1
+
+        ↕
+   Layer 3 Routing
+        ↕
+
+VLAN 20
+10.10.20.0/24
+Gateway 10.10.20.1
+```
+
+Como o `ip routing` está habilitado no Catalyst, o equipamento pode encaminhar pacotes entre essas duas redes.
+
+Foi validado:
+
+```text
+10.10.10.10 → 10.10.20.10
+```
+
+e:
+
+```text
+10.10.20.10 → 10.10.10.10
+```
+
+com sucesso.
+
+Isso confirma o funcionamento do roteamento inter-VLAN.
+<br></br>
+---
+
+### 11. Rota default do 3560CX
+
+O Catalyst não possui, nesta etapa, uma rota específica para redes externas.
+
+Foi então criada uma rota default:
+
+```text
+ip route 0.0.0.0 0.0.0.0 10.255.255.1
+```
+
+Representação:
+
+```text
+                       DEFAULT
+                          │
+                          ▼
+                      10.255.255.1
+                          │
+                          ▼
+                       C1111
+```
+
+Tabela:
+
+```text
+S* 0.0.0.0/0 [1/0] via 10.255.255.1
+```
+
+Onde:
+
+* `S` = Static
+* `*` = candidate default
+* `0.0.0.0/0` = qualquer destino não conhecido por uma rota mais específica
+* `10.255.255.1` = next-hop
+<br></br>
+---
+
+### 12. Rotas de retorno no C1111-4P
+
+O C1111 precisa saber como retornar às redes internas.
+
+Foram configuradas:
+
+```text
+ip route 10.10.10.0 255.255.255.0 10.255.255.2
+
+ip route 10.10.20.0 255.255.255.0 10.255.255.2
+```
+
+Tabela resultante:
+
+```text
+S 10.10.10.0/24 → 10.255.255.2
+S 10.10.20.0/24 → 10.255.255.2
+
+C 10.255.255.0/30 → Gi0/0/0
+L 10.255.255.1/32 → Gi0/0/0
+```
+
+Assim existe simetria:
+
+```text
+             ida
+VLAN 10 ──► 3560CX ──► C1111
+                    10.255.255.1
+
+             volta
+VLAN 10 ◄── 3560CX ◄── C1111
+                    10.255.255.2
+```
+
+O mesmo princípio vale para VLAN 20.
+<br></br>
+---
+
+### 13. Conceito importante: rota ≠ ARP
+
+Um dos pontos fundamentais validados nesta etapa foi a diferença entre:
+
+* tabela de roteamento;
+* CEF;
+* ARP.
+
+Para um destino como:
+
+```text
+8.8.8.8
+```
+
+o 3560CX não precisa descobrir o MAC de `8.8.8.8`.
+
+Primeiro ele consulta o encaminhamento:
+
+```text
+8.8.8.8
+   │
+   ▼
+CEF
+   │
+   ▼
+0.0.0.0/0
+   │
+   ▼
+next-hop 10.255.255.1
+   │
+   ▼
+GigabitEthernet0/12
+```
+
+Então o ARP é necessário para descobrir o MAC do **next-hop diretamente conectado**:
+
+```text
+10.255.255.1
+```
+
+e não de:
+
+```text
+8.8.8.8
+```
+<br></br>
+---
+
+### 14. Validação do CEF
+
+Foi utilizado:
+
+```text
+show ip cef 8.8.8.8
+```
+
+Resultado:
+
+```text
+0.0.0.0/0
+  nexthop 10.255.255.1 GigabitEthernet0/12
+```
+
+Isso confirma o caminho de encaminhamento:
+
+```text
+Destino:
+8.8.8.8
+
+Rota utilizada:
+0.0.0.0/0
+
+Next-hop:
+10.255.255.1
+
+Interface:
+GigabitEthernet0/12
+```
+
+Importante: nesta etapa isso **não significa que 8.8.8.8 seja alcançável**.
+
+O C1111 ainda não possui uma saída WAN/Internet configurada.
+
+Apenas significa que, caso o 3560CX receba um pacote destinado a `8.8.8.8`, sua decisão de encaminhamento será enviá-lo ao C1111.
+<br></br>
+---
+
+### 15. Fluxo de um pacote entre VLANs
+
+Exemplo:
+
+```text
+NixOS
+10.10.10.10
+      │
+      │ destino 10.10.20.10
+      ▼
+Gateway 10.10.10.1
+      │
+      ▼
+3560CX
+      │
+      │ routing
+      ▼
+VLAN 20
+      │
+      ▼
+10.10.20.10
+```
+
+O host percebe que `10.10.20.10` está fora da sua rede `/24`.
+
+Portanto envia o quadro ao seu gateway:
+
+```text
+10.10.10.1
+```
+
+O 3560CX então roteia o pacote para:
+
+```text
+10.10.20.10
+```
+<br></br>
+---
+
+### 16. Fluxo de um pacote para uma rede externa
+
+Exemplo conceitual:
+
+```text
+NixOS
+10.10.10.10
+      │
+      ▼
+Gateway
+10.10.10.1
+      │
+      ▼
+3560CX
+      │
+      │ sem rota específica
+      ▼
+Default Route
+0.0.0.0/0
+      │
+      ▼
+10.255.255.1
+      │
+      ▼
+C1111
+```
+
+Nesta etapa o fluxo termina conceitualmente no C1111 porque ainda não existe uma rede externa configurada.
+<br></br>
+---
+
+### 17. Comandos de verificação
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Interfaces</div>
+
+```text
+show ip interface brief
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">VLANs</div>
+
+```text
+show vlan brief
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Rotas</div>
+
+```text
+show ip route
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Rota default</div>
+
+```text
+show ip route 0.0.0.0
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">CEF</div>
+
+```text
+show ip cef 8.8.8.8
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">ARP</div>
+
+```text
+show ip arp
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Configuração atual</div>
+
+```text
+show running-config
+```
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Configuração persistida</div>
+
+```text
+show startup-config
+```
+<br></br>
+---
+
+### 18. Validação final da Etapa 1
+
+<div className="text-lg font-bold text-accent mt-4 mb-2">Catalyst 3560CX</div>
+
+```text
+show ip route
+```
+
+Deve apresentar, conceitualmente:
+
+```text
+S* 0.0.0.0/0 via 10.255.255.1
+
+C  10.10.10.0/24 → Vlan10
+L  10.10.10.1/32 → Vlan10
+
+C  10.10.20.0/24 → Vlan20
+L  10.10.20.1/32 → Vlan20
+
+C  10.255.255.0/30 → Gi0/12
+L  10.255.255.2/32 → Gi0/12
+```
+<br></br>
+<div className="text-lg font-bold text-accent mt-4 mb-2">Cisco C1111-4P</div>
+
+Deve apresentar:
+
+```text
+S 10.10.10.0/24 via 10.255.255.2
+S 10.10.20.0/24 via 10.255.255.2
+
+C 10.255.255.0/30 → Gi0/0/0
+L 10.255.255.1/32 → Gi0/0/0
+```
+<br></br>
+<div className="text-lg font-bold text-accent mt-4 mb-2">Conectividade validada</div>
+
+```text
+10.10.10.10 ↔ 10.10.20.10
+        │
+        └── inter-VLAN routing OK
+
+3560CX ↔ C1111
+        │
+        └── L3 P2P OK
+
+C1111 → 10.10.10.1
+        │
+        └── OK
+
+C1111 → 10.10.20.1
+        │
+        └── OK
+```
+<br></br>
+---
+
+### 19. Persistência
+
+Após a validação:
+
+```text
+copy running-config startup-config
+```
+
+Executado nos dois equipamentos.
+
+O estado da Etapa 1 está, portanto, persistido em `startup-config`.
+<br></br>
+---
+
+### 20. Estado final
+
+```text
+                       ┌──────────────────────┐
+                       │     Cisco C1111      │
+                       │   Internal Router    │
+                       │                      │
+                       │ Gi0/0/0              │
+                       │ 10.255.255.1/30      │
+                       └──────────┬───────────┘
+                                  │
+                                  │ Layer 3
+                                  │ P2P /30
+                                  │
+                                  │ 10.255.255.0/30
+                                  │
+                       ┌──────────┴───────────┐
+                       │   Catalyst 3560CX    │
+                       │      Layer 3 Core    │
+                       │                       │
+                       │ Gi0/12                │
+                       │ 10.255.255.2/30       │
+                       │                       │
+                       │ Vlan10 10.10.10.1/24  │
+                       │ Vlan20 10.10.20.1/24  │
+                       └───────┬───────┬───────┘
+                               │       │
+                         VLAN 10       VLAN 20
+                               │       │
+                         10.10.10.0   10.10.20.0
+                               │       │
+                           NixOS      Win11
+                         .10.10      .20.10
+```
+<br></br>
+<div className="text-lg font-bold text-accent mt-4 mb-2">Routing model</div>
+
+```text
+3560CX
+├── Connected
+│   ├── 10.10.10.0/24
+│   ├── 10.10.20.0/24
+│   └── 10.255.255.0/30
+│
+└── Static Default
+    └── 0.0.0.0/0
+        └── 10.255.255.1
+```
+
+```text
+C1111
+├── Connected
+│   └── 10.255.255.0/30
+│
+└── Static
+    ├── 10.10.10.0/24
+    │   └── 10.255.255.2
+    │
+    └── 10.10.20.0/24
+        └── 10.255.255.2
+```
+<br></br>
+---
+
+### 21. O que esta etapa estabeleceu
+
+Ao final desta etapa, o homelab possui seu primeiro domínio de roteamento Layer 3 funcional.
+
+Foram estabelecidos os seguintes fundamentos:
+
+1. VLANs como domínios Layer 2;
+2. SVIs como gateways Layer 3;
+3. roteamento inter-VLAN;
+4. interfaces físicas convertidas em interfaces Layer 3;
+5. enlace ponto a ponto `/30`;
+6. redes diretamente conectadas;
+7. rotas estáticas;
+8. rota default;
+9. next-hop;
+10. ARP para resolução do próximo salto;
+11. CEF para encaminhamento;
+12. rotas de retorno;
+13. persistência da configuração.
+
+O domínio funciona sem a necessidade de protocolo de roteamento dinâmico.
+
+Na próxima etapa, o objetivo será introduzir **OSPF**, substituindo progressivamente as rotas estáticas por roteamento dinâmico e observando como o comportamento do domínio muda.
