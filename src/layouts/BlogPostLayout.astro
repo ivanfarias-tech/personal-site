@@ -18,9 +18,42 @@ interface Props {
     coverAlt?: string
   }
   minutes: string
+  headings: {
+    depth: number
+    slug: string
+    text: string
+  }[]
 }
 
-const { id, frontmatter, minutes } = Astro.props
+type TocSection = {
+  heading: {
+    depth: number
+    slug: string
+    text: string
+  }
+  items: {
+    depth: number
+    slug: string
+    text: string
+  }[]
+}
+
+const { id, frontmatter, minutes, headings } = Astro.props
+
+const toc = headings.filter(({ depth }) => depth === 2 || depth === 3)
+
+const tocSections = toc.reduce<TocSection[]>((sections, heading) => {
+  if (heading.depth === 2) {
+    sections.push({
+      heading,
+      items: [],
+    })
+  } else if (sections.length > 0) {
+    sections[sections.length - 1].items.push(heading)
+  }
+
+  return sections
+}, [])
 
 const formattedDate = frontmatter.pubDate.toISOString().slice(0, 10)
 
@@ -40,58 +73,162 @@ const prevPost = posts[index - 1]
       article
     />
   </Head>
+
   <body>
     <Navbar />
-    <main class='post mx-auto w-full max-w-[750px] px-8'>
-      <div class='text-dim prompt-glyph pt-16 text-sm'>
-        cat ./posts/{id}.mdx
-      </div>
-      <h1 class='text-ink mt-3 mb-4 text-3xl font-bold tracking-tight md:text-4xl'>
-        {frontmatter.title}
-      </h1>
-      <div class='text-faint flex gap-5 text-[12.5px]'>
-        <span>{formattedDate}</span>
-        <span>{minutes}</span>
-      </div>
-      <hr class='border-border mt-5 mb-10' />
-      {
-        frontmatter.cover && (
-          <Image
-            src={frontmatter.cover}
-            alt={frontmatter.coverAlt ?? ''}
-            class='border-border border'
-          />
-        )
-      }
-      <article class='mt-8'>
-        <slot />
-      </article>
 
-      <div class='mt-14 flex flex-col gap-4 sm:flex-row sm:gap-6'>
+    <main class='post mx-auto w-full max-w-[1100px] px-8'>
+      <div class='lg:grid lg:grid-cols-[minmax(0,750px)_180px] lg:gap-12'>
+        <div>
+          <div class='text-dim prompt-glyph pt-16 text-sm'>
+            cat ./posts/{id}.mdx
+          </div>
+
+          <h1 class='text-ink mt-3 mb-4 text-3xl font-bold tracking-tight md:text-4xl'>
+            {frontmatter.title}
+          </h1>
+
+          <div class='text-faint flex gap-5 text-[12.5px]'>
+            <span>{formattedDate}</span>
+            <span>{minutes}</span>
+          </div>
+
+          <hr class='border-border mt-5 mb-10' />
+
+          {
+            frontmatter.cover && (
+              <Image
+                src={frontmatter.cover}
+                alt={frontmatter.coverAlt ?? ''}
+                class='border-border border'
+              />
+            )
+          }
+
+          <article class='mt-8'>
+            <slot />
+          </article>
+
+          <div class='mt-14 flex flex-col gap-4 sm:flex-row sm:gap-6'>
+            {
+              prevPost && (
+                <a
+                  href={`/posts/${prevPost.id}`}
+                  class='border-border bg-panel hover:border-accent-dim flex grow flex-col border p-4 text-sm transition-colors'
+                >
+                  <p class='text-faint mb-1'>&larr; previous</p>
+                  <p class='text-ink font-semibold'>{prevPost.data.title}</p>
+                </a>
+              )
+            }
+
+            {
+              nextPost && (
+                <a
+                  href={`/posts/${nextPost.id}`}
+                  class='border-border bg-panel hover:border-accent-dim flex grow flex-col border p-4 text-right text-sm transition-colors'
+                >
+                  <p class='text-faint mb-1'>next &rarr;</p>
+                  <p class='text-ink font-semibold'>{nextPost.data.title}</p>
+                </a>
+              )
+            }
+          </div>
+        </div>
+
         {
-          prevPost && (
-            <a
-              href={`/posts/${prevPost.id}`}
-              class='border-border bg-panel hover:border-accent-dim flex grow flex-col border p-4 text-sm transition-colors'
-            >
-              <p class='text-faint mb-1'>&larr; previous</p>
-              <p class='text-ink font-semibold'>{prevPost.data.title}</p>
-            </a>
-          )
-        }
-        {
-          nextPost && (
-            <a
-              href={`/posts/${nextPost.id}`}
-              class='border-border bg-panel hover:border-accent-dim flex grow flex-col border p-4 text-right text-sm transition-colors'
-            >
-              <p class='text-faint mb-1'>next &rarr;</p>
-              <p class='text-ink font-semibold'>{nextPost.data.title}</p>
-            </a>
+          tocSections.length > 0 && (
+            <aside class='hidden lg:block'>
+              <nav
+                class='pt-16 text-xs'
+                aria-label='Table of contents'
+                data-toc
+              >
+                <div class='text-faint mb-4 uppercase tracking-wider'>
+                  contents
+                </div>
+
+                <div>
+                  {
+                    tocSections.map((section, sectionIndex) => (
+                      <div class='mt-4 first:mt-0'>
+                        <div class='flex items-start gap-2'>
+                          <a
+                            href={`#${section.heading.slug}`}
+                            class='text-dim hover:text-accent !border-0 block leading-5 transition-colors'
+                          >
+                            {section.heading.text}
+                          </a>
+
+                          <button
+                            type='button'
+                            class='text-accent hover:text-ink shrink-0 border-0 px-1 text-sm leading-5 transition-colors'
+                            aria-expanded={sectionIndex === 0 ? 'true' : 'false'}
+                            aria-controls={`toc-section-${sectionIndex}`}
+                            data-toc-toggle
+                            aria-label={sectionIndex === 0 ? 'Collapse section' : 'Expand section'}
+                          >
+                            <span data-toc-icon>
+                              {sectionIndex === 0 ? '−' : '+'}
+                            </span>
+                          </button>
+                        </div>
+                        <div
+                          id={`toc-section-${sectionIndex}`}
+                          class={sectionIndex === 0 ? 'mt-1 pl-5' : 'hidden mt-1 pl-5'}
+                          data-toc-section
+                        >
+                          {
+                            section.items.map((item) => (
+                              <div class='mt-1'>
+                                <a
+                                  href={`#${item.slug}`}
+                                  class='text-dim/80 hover:text-accent !border-0 block leading-5 transition-colors'
+                                >
+                                  {item.text}
+                                </a>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      </div>
+                    ))
+                  }
+                </div>
+              </nav>
+            </aside>
           )
         }
       </div>
     </main>
+
     <Footer />
   </body>
 </html>
+
+<script>
+  const toc = document.querySelector('[data-toc]')
+
+  if (toc) {
+    const toggleButtons = toc.querySelectorAll('[data-toc-toggle]')
+
+    toggleButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const sectionId = button.getAttribute('aria-controls')
+
+        if (!sectionId) return
+
+        const section = document.getElementById(sectionId)
+        const icon = button.querySelector('[data-toc-icon]')
+
+        if (!section || !icon) return
+
+        const isExpanded = button.getAttribute('aria-expanded') === 'true'
+
+        button.setAttribute('aria-expanded', String(!isExpanded))
+        section.classList.toggle('hidden', isExpanded)
+        icon.textContent = isExpanded ? '▸' : '▾'
+      })
+    })
+  }
+</script>
