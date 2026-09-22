@@ -78,7 +78,7 @@ const prevPost = posts[index - 1]
     <Navbar />
 
     <main class='post mx-auto w-full max-w-[1100px] px-8'>
-      <div class='lg:grid lg:grid-cols-[minmax(0,750px)_180px] lg:gap-12'>
+      <div class='lg:grid lg:grid-cols-[minmax(0,750px)_260px] lg:gap-12'>
         <div>
           <div class='text-dim prompt-glyph pt-16 text-sm'>
             cat ./posts/{id}.mdx
@@ -140,7 +140,7 @@ const prevPost = posts[index - 1]
           tocSections.length > 0 && (
             <aside class='hidden lg:block'>
               <nav
-                class='pt-16 text-xs'
+                class='sticky top-24 pt-16 text-xs'
                 aria-label='Table of contents'
                 data-toc
               >
@@ -227,7 +227,11 @@ const prevPost = posts[index - 1]
 
         button.setAttribute('aria-expanded', String(!isExpanded))
         section.classList.toggle('hidden', isExpanded)
-        icon.textContent = isExpanded ? '▸' : '▾'
+        icon.textContent = isExpanded ? '+' : '−'
+        button.setAttribute(
+          'aria-label',
+          isExpanded ? 'Expand section' : 'Collapse section'
+        )
       })
     })
   }
