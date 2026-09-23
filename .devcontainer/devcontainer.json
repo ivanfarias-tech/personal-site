@@ -5,6 +5,6 @@
   },
   "forwardPorts": [4321],
   "mounts": [
-    "source=${localWorkspaceFolder}/../.pnpm-store,target=/pnpm-store,type=bind"
+    "source=${localWorkspaceFolder}/../../.pnpm-store,target=/pnpm-store,type=bind"
   ]
 }
