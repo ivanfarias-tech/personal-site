@@ -5,8 +5,8 @@ pubDate: 2026-09-21
 draft: false
 ---
 
-import TopologiaFase1 from '../../assets/posts/redesenhando-rede-homelab-core-l3-cisco-opnsense/topologia-fase-1.svg';
-
+import { Image } from 'astro:assets';
+import TopologiaFase1Svg from '../../assets/posts/redesenhando-rede-homelab-core-l3-cisco-opnsense/topologia-fase-1.svg';
 
 Um dos maiores desafios em um homelab é a arquitetura de rede. Inicialmente, a estrutura era totalmente plana (todos os hosts na mesma VLAN), o que atendeu aos testes iniciais, mas logo virou um gargalo com a expansão dos serviços.
 
@@ -73,15 +73,18 @@ Estabelecer o primeiro domínio de roteamento do homelab utilizando:
 Nesta etapa ainda não existe OSPF, BGP, NAT, Internet ou OPNsense conectado.
 
 O objetivo é construir e validar uma base funcional de roteamento antes de introduzir protocolos de roteamento dinâmico.
+
 <br></br>
 ---
 
 ### 2. Topologia
 
+
 <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-<TopologiaFase1 />
+  <Image src={TopologiaFase1Svg} alt="Topologia Fase 1" />
 </div>
 <br></br>
+
 ---
 
 ### 3. Endereçamento
