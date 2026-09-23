@@ -79,3 +79,15 @@ const ogType = article ? 'article' : 'website'
 <!-- ViewTransitions -->
 <ClientRouter />
 
+<!-- Google tag (gtag.js) -->
+<script
+  async
+  src="https://www.googletagmanager.com/gtag/js?id=G-RMMLJ21PYQ"
+></script>
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RMMLJ21PYQ');
+</script>
