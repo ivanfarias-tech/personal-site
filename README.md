@@ -88,6 +88,18 @@ Set `draft: true` to exclude a post from the production build.
 MDX supports regular Markdown syntax, fenced code blocks, and Astro/MDX
 components when a post requires them.
 
+## Blog post navigation
+
+Individual posts include a collapsible table of contents generated from
+the post's `h2` and `h3` headings.
+
+On larger screens, the table of contents is displayed alongside the post
+content and remains visible while scrolling. On smaller screens, it is
+hidden to preserve the available reading width.
+
+The table of contents supports expanding and collapsing individual
+sections.
+
 ## Styling
 
 The project uses Tailwind CSS v4 with CSS-first configuration.
