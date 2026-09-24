@@ -7,6 +7,7 @@ draft: false
 
 import { Image } from 'astro:assets';
 import TopologiaFase1Svg from '../../assets/posts/redesenhando-rede-homelab-core-l3-cisco-opnsense/topologia-fase-1.svg';
+import EstadoFinalSvg from '../../assets/posts/redesenhando-rede-homelab-core-l3-cisco-opnsense/estado-final.svg';
 
 Um dos maiores desafios em um homelab é a arquitetura de rede. Inicialmente, a estrutura era totalmente plana (todos os hosts na mesma VLAN), o que atendeu aos testes iniciais, mas logo virou um gargalo com a expansão dos serviços.
 
@@ -89,14 +90,18 @@ O objetivo é construir e validar uma base funcional de roteamento antes de intr
 
 ### 3. Endereçamento
 
-| Função          | Equipamento     | Interface | Endereço          |
-| --------------  | -------------   | -------   | ----------------  |
-| P2P             | Cisco C1111-4P  | Gi0/0/0   | `10.255.255.1/30` |
-| P2P             | Catalyst 3560CX | Gi0/12    | `10.255.255.2/30` |
-| Gateway VLAN 10 | Catalyst 3560CX | Vlan10    | `10.10.10.1/24`   |
-| Gateway VLAN 20 | Catalyst 3560CX | Vlan20    | `10.10.20.1/24`   |
-| Host de teste   | NixOS           | Gi0/1     | `10.10.10.10/24`  |
-| Host de teste   | Windows 11      | Gi0/2     | `10.10.20.10/24`  |
+```text
++-----------------+-----------------+-----------+-----------------+
+| Função          | Equipamento     | Interface | Endereço        |
++-----------------+-----------------+-----------+-----------------+
+| P2P             | Cisco C1111-4P  | Gi0/0/0   | 10.255.255.1/30 |
+| P2P             | Catalyst 3560CX | Gi0/12    | 10.255.255.2/30 |
+| Gateway VLAN 10 | Catalyst 3560CX | Vlan10    | 10.10.10.1/24   |
+| Gateway VLAN 20 | Catalyst 3560CX | Vlan20    | 10.10.20.1/24   |
+| Host de teste   | NixOS           | Gi0/1     | 10.10.10.10/24  |
+| Host de teste   | Windows 11      | Gi0/2     | 10.10.20.10/24  |
++-----------------+-----------------+-----------+-----------------+
+```
 
 Gateways dos hosts:
 
@@ -729,38 +734,11 @@ O estado da Etapa 1 está, portanto, persistido em `startup-config`.
 
 ### 20. Estado final
 
-```text
-                       ┌──────────────────────┐
-                       │     Cisco C1111      │
-                       │   Internal Router    │
-                       │                      │
-                       │ Gi0/0/0              │
-                       │ 10.255.255.1/30      │
-                       └──────────┬───────────┘
-                                  │
-                                  │ Layer 3
-                                  │ P2P /30
-                                  │
-                                  │ 10.255.255.0/30
-                                  │
-                       ┌──────────┴───────────┐
-                       │   Catalyst 3560CX    │
-                       │      Layer 3 Core    │
-                       │                       │
-                       │ Gi0/12                │
-                       │ 10.255.255.2/30       │
-                       │                       │
-                       │ Vlan10 10.10.10.1/24  │
-                       │ Vlan20 10.10.20.1/24  │
-                       └───────┬───────┬───────┘
-                               │       │
-                         VLAN 10       VLAN 20
-                               │       │
-                         10.10.10.0   10.10.20.0
-                               │       │
-                           NixOS      Win11
-                         .10.10      .20.10
-```
+<div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+  <Image src={EstadoFinalSvg} alt="Topologia Fase 1" />
+</div>
+<br></br>
+
 <br></br>
 <div className="text-lg font-bold text-accent mt-4 mb-2">Routing model</div>
 
